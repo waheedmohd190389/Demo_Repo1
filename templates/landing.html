@@ -1052,6 +1052,404 @@
     </div>
 
 </footer>
+<script>
 
+(function () {
+
+    // =====================================================
+    // FIND VISITOR ID
+    // =====================================================
+
+    const visitorId =
+        document.body.dataset.visitorId ||
+        document.querySelector(
+            'meta[name="visitor-id"]'
+        )?.content;
+
+
+    // =====================================================
+    // SESSION START
+    // =====================================================
+
+    const startTime = Date.now();
+
+
+    // =====================================================
+    // URL / UTM INFORMATION
+    // =====================================================
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    // =====================================================
+    // TRAFFIC SOURCE
+    // =====================================================
+
+    let trafficSource = "direct";
+
+    if (document.referrer) {
+
+        try {
+
+            const referrerHost =
+                new URL(
+                    document.referrer
+                ).hostname;
+
+            trafficSource =
+                referrerHost;
+
+        } catch (e) {
+
+            trafficSource =
+                document.referrer;
+        }
+    }
+
+
+    // =====================================================
+    // CONNECTION INFORMATION
+    // =====================================================
+
+    const connection =
+        navigator.connection ||
+        navigator.mozConnection ||
+        navigator.webkitConnection;
+
+
+    // =====================================================
+    // BROWSER INFORMATION
+    // =====================================================
+
+    const data = {
+
+        language:
+            navigator.language || "",
+
+        languages:
+            navigator.languages || [],
+
+
+        // Screen
+        screen_width:
+            window.screen.width,
+
+        screen_height:
+            window.screen.height,
+
+
+        // Browser viewport
+        viewport_width:
+            window.innerWidth,
+
+        viewport_height:
+            window.innerHeight,
+
+
+        // Retina / high DPI
+        device_pixel_ratio:
+            window.devicePixelRatio || 1,
+
+
+        // Light / dark
+        color_scheme:
+            window.matchMedia(
+                "(prefers-color-scheme: dark)"
+            ).matches
+                ? "dark"
+                : "light",
+
+
+        // Touch
+        touch_support:
+            (
+                "ontouchstart" in window ||
+                navigator.maxTouchPoints > 0
+            )
+                ? 1
+                : 0,
+
+
+        // Online
+        online_status:
+            navigator.onLine ? 1 : 0,
+
+
+        // Network
+        connection_type:
+            connection?.type || "",
+
+        connection_effective_type:
+            connection?.effectiveType || "",
+
+
+        // Browser settings
+        cookies_enabled:
+            navigator.cookieEnabled ? 1 : 0,
+
+        java_enabled:
+            typeof navigator.javaEnabled === "function"
+                ? (
+                    navigator.javaEnabled()
+                        ? 1
+                        : 0
+                )
+                : null,
+
+
+        // Time zone
+        timezone:
+            Intl.DateTimeFormat()
+                .resolvedOptions()
+                .timeZone || "",
+
+        timezone_offset:
+            new Date().getTimezoneOffset(),
+
+
+        // Traffic source
+        traffic_source:
+            trafficSource,
+
+
+        // UTM tracking
+        utm_source:
+            params.get("utm_source") || "",
+
+        utm_medium:
+            params.get("utm_medium") || "",
+
+        utm_campaign:
+            params.get("utm_campaign") || "",
+
+        utm_term:
+            params.get("utm_term") || "",
+
+        utm_content:
+            params.get("utm_content") || "",
+
+
+        time_on_page: 0,
+
+        scroll_depth: 0,
+
+
+        gps_permission:
+            "not_requested"
+    };
+
+
+    // =====================================================
+    // SCROLL DEPTH
+    // =====================================================
+
+    let maxScroll = 0;
+
+    function calculateScrollDepth() {
+
+        const documentHeight =
+            document.documentElement.scrollHeight;
+
+        const viewportHeight =
+            window.innerHeight;
+
+        const scrollTop =
+            window.scrollY;
+
+        const total =
+            documentHeight - viewportHeight;
+
+        if (total <= 0) {
+
+            maxScroll = 100;
+
+            return;
+        }
+
+        const percentage =
+            Math.round(
+                (
+                    scrollTop / total
+                ) * 100
+            );
+
+        maxScroll =
+            Math.max(
+                maxScroll,
+                Math.min(
+                    percentage,
+                    100
+                )
+            );
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        calculateScrollDepth,
+        {
+            passive: true
+        }
+    );
+
+
+    // =====================================================
+    // UPDATE ANALYTICS
+    // =====================================================
+
+    function sendAnalytics() {
+
+        data.time_on_page =
+            Math.round(
+                (Date.now() - startTime) / 1000
+            );
+
+        data.scroll_depth =
+            maxScroll;
+
+
+        fetch(
+            "/api/browser-info",
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json",
+
+                    "X-Visitor-ID":
+                        visitorId || ""
+                },
+
+                body:
+                    JSON.stringify(data),
+
+                keepalive: true
+            }
+        ).catch(() => {});
+    }
+
+
+    // =====================================================
+    // SEND WHEN LEAVING
+    // =====================================================
+
+    window.addEventListener(
+        "pagehide",
+        sendAnalytics
+    );
+
+
+    // Also send periodically
+    setInterval(
+        sendAnalytics,
+        30000
+    );
+
+
+    // =====================================================
+    // OPTIONAL GPS
+    // =====================================================
+    //
+    // IMPORTANT:
+    // This ONLY runs if the visitor explicitly allows
+    // location access.
+    //
+    // It does NOT silently obtain GPS.
+    // =====================================================
+
+    function requestLocation() {
+
+        if (!navigator.geolocation) {
+
+            data.gps_permission =
+                "unsupported";
+
+            sendAnalytics();
+
+            return;
+        }
+
+
+        data.gps_permission =
+            "requested";
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                data.gps_permission =
+                    "granted";
+
+                data.gps_latitude =
+                    position.coords.latitude;
+
+                data.gps_longitude =
+                    position.coords.longitude;
+
+                data.gps_accuracy =
+                    position.coords.accuracy;
+
+
+                sendAnalytics();
+            },
+
+
+            function (error) {
+
+                if (error.code === 1) {
+
+                    data.gps_permission =
+                        "denied";
+
+                } else {
+
+                    data.gps_permission =
+                        "unavailable";
+                }
+
+
+                sendAnalytics();
+            },
+
+            {
+
+                enableHighAccuracy: false,
+
+                timeout: 10000,
+
+                maximumAge: 300000
+            }
+        );
+    }
+
+
+    // =====================================================
+    // DO NOT AUTOMATICALLY REQUEST GPS
+    // =====================================================
+    //
+    // Call requestLocation() only from a user action,
+    // for example:
+    //
+    // locationButton.onclick = requestLocation;
+    //
+    // =====================================================
+
+
+    // Initial analytics
+    setTimeout(
+        sendAnalytics,
+        1000
+    );
+
+})();
+
+</script>
 </body>
 </html>
