@@ -1,14 +1,1057 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Welcome</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Maisonora Interiors | Timeless Interior Design</title>
+
+    <meta
+        name="description"
+        content="Maisonora Interiors creates elegant, timeless and personalized interiors for modern homes."
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "DM Sans", sans-serif;
+            background: #f6f2eb;
+            color: #292721;
+            line-height: 1.6;
+        }
+
+        img {
+            width: 100%;
+            display: block;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: min(1180px, 90%);
+            margin: auto;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            padding: 25px 0;
+            color: white;
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: "Playfair Display", serif;
+            font-size: 27px;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            font-size: 11px;
+            letter-spacing: 4px;
+            display: block;
+            margin-top: -4px;
+            opacity: .85;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 34px;
+            list-style: none;
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            opacity: .9;
+            transition: .3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: #dfc69c;
+        }
+
+        .nav-button {
+            border: 1px solid rgba(255,255,255,.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 760px;
+            height: 92vh;
+            position: relative;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(20,18,14,.72),
+                    rgba(20,18,14,.35),
+                    rgba(20,18,14,.10)
+                ),
+                url("https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2200&q=90")
+                center/cover no-repeat;
+
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 680px;
+            padding-top: 50px;
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 12px;
+            color: #e3cda7;
+            margin-bottom: 22px;
+            font-weight: 600;
+        }
+
+        .hero h1 {
+            font-family: "Playfair Display", serif;
+            font-size: clamp(50px, 7vw, 88px);
+            font-weight: 400;
+            line-height: 1.02;
+            margin-bottom: 28px;
+        }
+
+        .hero p {
+            max-width: 560px;
+            font-size: 18px;
+            color: rgba(255,255,255,.88);
+            margin-bottom: 35px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 26px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .3s;
+        }
+
+        .btn-primary {
+            background: #d7bb8c;
+            color: #211e18;
+        }
+
+        .btn-primary:hover {
+            background: #ecd5a9;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(255,255,255,.6);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: #25231e;
+        }
+
+        /* =========================
+           INTRO
+        ========================= */
+
+        .intro {
+            padding: 110px 0;
+        }
+
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 90px;
+            align-items: center;
+        }
+
+        .section-label {
+            color: #9a7b4d;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        h2 {
+            font-family: "Playfair Display", serif;
+            font-size: clamp(38px, 5vw, 60px);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+
+        .intro-text p {
+            color: #68645c;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .intro-image {
+            height: 560px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* =========================
+           SPACES
+        ========================= */
+
+        .spaces {
+            background: #ebe5da;
+            padding: 105px 0;
+        }
+
+        .section-heading {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 55px;
+        }
+
+        .section-heading p {
+            color: #6e6a61;
+        }
+
+        .space-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .space-card {
+            background: white;
+            overflow: hidden;
+            transition: .35s;
+        }
+
+        .space-card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 20px 50px rgba(0,0,0,.10);
+        }
+
+        .space-card img {
+            height: 360px;
+            object-fit: cover;
+        }
+
+        .space-content {
+            padding: 25px;
+        }
+
+        .space-content h3 {
+            font-family: "Playfair Display", serif;
+            font-size: 27px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .space-content p {
+            color: #777269;
+            font-size: 14px;
+        }
+
+        /* =========================
+           SERVICES
+        ========================= */
+
+        .services {
+            padding: 110px 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .service {
+            padding: 35px 25px;
+            border-top: 1px solid #cfc7b8;
+        }
+
+        .service-number {
+            font-size: 12px;
+            color: #a48455;
+            margin-bottom: 25px;
+        }
+
+        .service h3 {
+            font-family: "Playfair Display", serif;
+            font-size: 25px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .service p {
+            font-size: 14px;
+            color: #716d65;
+        }
+
+        /* =========================
+           FEATURED PROJECT
+        ========================= */
+
+        .project {
+            padding: 0 0 110px;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            min-height: 570px;
+        }
+
+        .project-image {
+            background:
+                url("https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=90")
+                center/cover;
+        }
+
+        .project-content {
+            background: #292821;
+            color: white;
+            padding: 70px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .project-content .section-label {
+            color: #d7bb8c;
+        }
+
+        .project-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .project-content p {
+            color: #c6c2b9;
+            margin-bottom: 30px;
+        }
+
+        /* =========================
+           QUOTE
+        ========================= */
+
+        .quote {
+            padding: 120px 0;
+            text-align: center;
+            background: #dcd2c1;
+        }
+
+        .quote-mark {
+            font-family: "Playfair Display", serif;
+            font-size: 80px;
+            line-height: .6;
+            color: #a58a62;
+        }
+
+        .quote blockquote {
+            max-width: 850px;
+            margin: 25px auto;
+            font-family: "Playfair Display", serif;
+            font-size: clamp(28px, 4vw, 45px);
+            line-height: 1.25;
+        }
+
+        .quote-author {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #726755;
+        }
+
+        /* =========================
+           CTA
+        ========================= */
+
+        .cta {
+            padding: 100px 0;
+            background:
+                linear-gradient(rgba(25,23,19,.75), rgba(25,23,19,.75)),
+                url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2200&q=90")
+                center/cover;
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            max-width: 750px;
+            margin: 0 auto 25px;
+        }
+
+        .cta p {
+            color: #ddd8ce;
+            margin-bottom: 30px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #211f1b;
+            color: white;
+            padding: 55px 0 25px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 50px;
+            padding-bottom: 45px;
+        }
+
+        footer h3 {
+            font-family: "Playfair Display", serif;
+            font-size: 27px;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+
+        footer p,
+        footer a {
+            color: #aaa69e;
+            font-size: 13px;
+        }
+
+        footer h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+            color: #d9d3c8;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .copyright {
+            border-top: 1px solid #3b3832;
+            padding-top: 20px;
+            color: #858179;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                min-height: 680px;
+            }
+
+            .intro-grid {
+                grid-template-columns: 1fr;
+                gap: 45px;
+            }
+
+            .space-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .project-image {
+                min-height: 400px;
+            }
+
+            .project-content {
+                padding: 50px 30px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .hero h1 {
+                font-size: 50px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .copyright {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .intro-image {
+                height: 400px;
+            }
+
+        }
+
+    </style>
 </head>
 
 <body>
 
-<h1>Welcome</h1>
+<!-- =========================
+     NAVIGATION
+========================= -->
 
-<p>Thanks for visiting.</p>
+<nav>
+    <div class="container nav-inner">
+
+        <a href="#" class="logo">
+            MAISONORA
+            <span>INTERIORS</span>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#spaces">Spaces</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#projects">Projects</a></li>
+        </ul>
+
+        <a href="#contact" class="nav-button">
+            Start a Project
+        </a>
+
+    </div>
+</nav>
+
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+    <div class="container">
+
+        <div class="hero-content">
+
+            <div class="eyebrow">
+                Interior Architecture · Home Styling
+            </div>
+
+            <h1>
+                Spaces that feel like home.
+            </h1>
+
+            <p>
+                Thoughtful interiors designed around the way you live,
+                blending timeless materials, natural textures and
+                effortless elegance.
+            </p>
+
+            <div class="buttons">
+
+                <a href="#projects" class="btn btn-primary">
+                    Explore Our Work
+                </a>
+
+                <a href="#contact" class="btn btn-outline">
+                    Book a Consultation
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     ABOUT
+========================= -->
+
+<section class="intro" id="about">
+
+    <div class="container intro-grid">
+
+        <div class="intro-text">
+
+            <div class="section-label">
+                Our Philosophy
+            </div>
+
+            <h2>
+                Beautiful spaces,
+                thoughtfully lived.
+            </h2>
+
+            <p>
+                We believe great interiors are more than beautiful
+                rooms. They should reflect your personality, support
+                your everyday rituals and make you feel completely
+                at home.
+            </p>
+
+            <p>
+                From the first sketch to the final cushion, we create
+                considered spaces where architecture, furniture,
+                lighting and natural materials come together.
+            </p>
+
+            <a href="#contact" class="btn btn-primary">
+                Work With Us
+            </a>
+
+        </div>
+
+        <div>
+
+            <img
+                class="intro-image"
+                src="https://images.unsplash.com/photo-1617104678098-de229db51175?auto=format&fit=crop&w=1400&q=90"
+                alt="Elegant modern living room"
+            >
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     SPACES
+========================= -->
+
+<section class="spaces" id="spaces">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div class="section-label">
+                Explore Our Spaces
+            </div>
+
+            <h2>
+                Designed for every chapter of life.
+            </h2>
+
+            <p>
+                From calm bedrooms to welcoming living spaces,
+                every room has its own story.
+            </p>
+
+        </div>
+
+
+        <div class="space-grid">
+
+            <article class="space-card">
+
+                <img
+                    src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=90"
+                    alt="Luxury living room"
+                >
+
+                <div class="space-content">
+
+                    <h3>Living Rooms</h3>
+
+                    <p>
+                        Warm, inviting spaces made for gathering,
+                        relaxing and making memories.
+                    </p>
+
+                </div>
+
+            </article>
+
+
+            <article class="space-card">
+
+                <img
+                    src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1200&q=90"
+                    alt="Elegant bedroom"
+                >
+
+                <div class="space-content">
+
+                    <h3>Bedrooms</h3>
+
+                    <p>
+                        Serene personal retreats designed for
+                        comfort and quiet.
+                    </p>
+
+                </div>
+
+            </article>
+
+
+            <article class="space-card">
+
+                <img
+                    src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=90"
+                    alt="Modern kitchen"
+                >
+
+                <div class="space-content">
+
+                    <h3>Kitchens</h3>
+
+                    <p>
+                        Functional kitchens where thoughtful design
+                        meets everyday living.
+                    </p>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     SERVICES
+========================= -->
+
+<section class="services" id="services">
+
+    <div class="container">
+
+        <div class="section-heading">
+
+            <div class="section-label">
+                What We Do
+            </div>
+
+            <h2>
+                From vision to finishing touches.
+            </h2>
+
+        </div>
+
+
+        <div class="services-grid">
+
+            <div class="service">
+
+                <div class="service-number">01</div>
+
+                <h3>Interior Design</h3>
+
+                <p>
+                    Complete interior concepts tailored to your
+                    lifestyle, architecture and personality.
+                </p>
+
+            </div>
+
+
+            <div class="service">
+
+                <div class="service-number">02</div>
+
+                <h3>Home Styling</h3>
+
+                <p>
+                    Furniture, artwork, lighting and accessories
+                    carefully selected to complete your space.
+                </p>
+
+            </div>
+
+
+            <div class="service">
+
+                <div class="service-number">03</div>
+
+                <h3>Renovation</h3>
+
+                <p>
+                    Thoughtful transformations that improve both
+                    beauty and functionality.
+                </p>
+
+            </div>
+
+
+            <div class="service">
+
+                <div class="service-number">04</div>
+
+                <h3>Custom Spaces</h3>
+
+                <p>
+                    Bespoke solutions designed specifically around
+                    the way you and your family live.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     FEATURED PROJECT
+========================= -->
+
+<section class="project" id="projects">
+
+    <div class="container">
+
+        <div class="project-grid">
+
+            <div class="project-image"></div>
+
+            <div class="project-content">
+
+                <div class="section-label">
+                    Featured Project
+                </div>
+
+                <h2>
+                    The Quiet House
+                </h2>
+
+                <p>
+                    A warm contemporary home inspired by natural
+                    stone, oak, linen and soft daylight. Every detail
+                    was selected to create a calm and timeless
+                    atmosphere.
+                </p>
+
+                <div>
+                    <a href="#contact" class="btn btn-primary">
+                        View Project
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     TESTIMONIAL
+========================= -->
+
+<section class="quote">
+
+    <div class="container">
+
+        <div class="quote-mark">
+            “
+        </div>
+
+        <blockquote>
+            Our home finally feels like us.
+            Every room is beautiful, but more importantly,
+            it feels completely natural to live in.
+        </blockquote>
+
+        <div class="quote-author">
+            — A & R · Hyderabad
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     CONTACT CTA
+========================= -->
+
+<section class="cta" id="contact">
+
+    <div class="container">
+
+        <div class="section-label">
+            Begin Your Journey
+        </div>
+
+        <h2>
+            Let's create a home
+            you'll love coming back to.
+        </h2>
+
+        <p>
+            Tell us about your space, your style and what you
+            dream of creating.
+        </p>
+
+        <a href="mailto:hello@maisonora.com" class="btn btn-primary">
+            Start a Conversation
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+    <div class="container">
+
+        <div class="footer-grid">
+
+            <div>
+
+                <h3>Maisonora</h3>
+
+                <p>
+                    Timeless interiors for modern living.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h4>Explore</h4>
+
+                <div class="footer-links">
+                    <a href="#about">About</a>
+                    <a href="#spaces">Spaces</a>
+                    <a href="#projects">Projects</a>
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <h4>Services</h4>
+
+                <div class="footer-links">
+                    <a href="#services">Interior Design</a>
+                    <a href="#services">Home Styling</a>
+                    <a href="#services">Renovation</a>
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <h4>Contact</h4>
+
+                <div class="footer-links">
+                    <a href="mailto:hello@maisonora.com">
+                        Email Us
+                    </a>
+                    <a href="#contact">
+                        Consultation
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="copyright">
+
+            <span>
+                © 2026 Maisonora Interiors
+            </span>
+
+            <span>
+                Crafted for beautiful living.
+            </span>
+
+        </div>
+
+    </div>
+
+</footer>
 
 </body>
 </html>
