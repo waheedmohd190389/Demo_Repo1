@@ -1,10 +1,4 @@
-<<<<<<< HEAD
 Flask
 requests
 user-agents
-=======
-Flask
-requests
-user-agents
->>>>>>> 2ecc4ab49d5cac56fcfc536335ceace87faa4d66
 gunicorn
