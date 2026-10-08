@@ -9,6 +9,10 @@ app = Flask(__name__)
 DB = "visitors.db"
 
 
+# --------------------------------------------------
+# DATABASE
+# --------------------------------------------------
+
 def init_db():
     conn = sqlite3.connect(DB)
 
@@ -37,20 +41,52 @@ def init_db():
     conn.close()
 
 
+# --------------------------------------------------
+# GET VISITOR IP
+# --------------------------------------------------
+
 def get_ip():
-    # When deployed behind a trusted reverse proxy,
-    # configure the proxy correctly before trusting forwarded IPs.
+    """
+    Render sits behind a proxy.
+    X-Forwarded-For may contain the original client IP.
+    """
+
+    forwarded_for = request.headers.get("X-Forwarded-For")
+
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
     return request.remote_addr
 
 
+# --------------------------------------------------
+# IP GEOLOCATION
+# --------------------------------------------------
+
 def get_ip_location(ip):
+
+    empty_location = {
+        "country": None,
+        "region": None,
+        "city": None,
+        "latitude": None,
+        "longitude": None,
+        "isp": None
+    }
+
+    # Local/private IPs cannot be geolocated
+    if not ip or ip.startswith("127.") or ip == "::1":
+        return empty_location
+
     try:
+
         response = requests.get(
             f"https://ipapi.co/{ip}/json/",
             timeout=5
         )
 
         if response.ok:
+
             data = response.json()
 
             return {
@@ -65,44 +101,62 @@ def get_ip_location(ip):
     except requests.RequestException:
         pass
 
-    return {
-        "country": None,
-        "region": None,
-        "city": None,
-        "latitude": None,
-        "longitude": None,
-        "isp": None
-    }
+    return empty_location
 
+
+# --------------------------------------------------
+# HOME PAGE
+# --------------------------------------------------
 
 @app.route("/")
 def landing():
 
+    # Visitor IP
     ip = get_ip()
+
+    # User-Agent
     ua_string = request.headers.get("User-Agent", "")
 
+    # Parse User-Agent
     ua = parse(ua_string)
 
+    # IP-based approximate location
     location = get_ip_location(ip)
 
+    # Build visitor record
     visitor = {
-        "visit_time": datetime.now(timezone.utc).isoformat(),
-        "ip": ip,
-        "user_agent": ua_string,
 
-        "browser": ua.browser.family,
-        "browser_version": ua.browser.version_string,
+        "visit_time":
+            datetime.now(timezone.utc).isoformat(),
 
-        "os": ua.os.family,
-        "os_version": ua.os.version_string,
+        "ip":
+            ip,
 
-        "device": ua.device.family,
+        "user_agent":
+            ua_string,
 
-        "referrer": request.headers.get("Referer", ""),
+        "browser":
+            ua.browser.family,
+
+        "browser_version":
+            ua.browser.version_string,
+
+        "os":
+            ua.os.family,
+
+        "os_version":
+            ua.os.version_string,
+
+        "device":
+            ua.device.family,
+
+        "referrer":
+            request.headers.get("Referer", ""),
 
         **location
     }
 
+    # Save visitor information
     conn = sqlite3.connect(DB)
 
     conn.execute("""
@@ -125,6 +179,7 @@ def landing():
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
+
         visitor["visit_time"],
         visitor["ip"],
         visitor["user_agent"],
@@ -140,6 +195,7 @@ def landing():
         visitor["latitude"],
         visitor["longitude"],
         visitor["isp"]
+
     ))
 
     conn.commit()
@@ -148,10 +204,15 @@ def landing():
     return render_template("landing.html")
 
 
+# --------------------------------------------------
+# DASHBOARD
+# --------------------------------------------------
+
 @app.route("/dashboard")
 def dashboard():
 
     conn = sqlite3.connect(DB)
+
     conn.row_factory = sqlite3.Row
 
     visitors = conn.execute("""
@@ -168,8 +229,19 @@ def dashboard():
     )
 
 
+# --------------------------------------------------
+# IMPORTANT
+# Initialize database when Gunicorn starts
+# --------------------------------------------------
+
+init_db()
+
+
+# --------------------------------------------------
+# LOCAL DEVELOPMENT
+# --------------------------------------------------
+
 if __name__ == "__main__":
-    init_db()
 
     app.run(
         host="127.0.0.1",
