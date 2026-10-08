@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from flask import Flask, request, render_template
 from user_agents import parse
 import requests
@@ -354,5 +354,4 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=5000,
         debug=True
->>>>>>> 2ecc4ab49d5cac56fcfc536335ceace87faa4d66
     )
