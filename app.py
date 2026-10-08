@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, jsonify
 from user_agents import parse
 import requests
 import sqlite3
-import json
 import uuid
 from datetime import datetime, timezone
 
@@ -25,11 +24,9 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
             visit_time TEXT,
-
             session_id TEXT,
 
             ip TEXT,
-
             user_agent TEXT,
 
             browser TEXT,
@@ -75,14 +72,12 @@ def init_db():
             color_scheme TEXT,
 
             touch_support INTEGER,
-
             online_status INTEGER,
 
             connection_type TEXT,
             connection_effective_type TEXT,
 
             cookies_enabled INTEGER,
-
             java_enabled INTEGER,
 
             timezone_offset INTEGER,
@@ -98,15 +93,12 @@ def init_db():
             is_returning INTEGER DEFAULT 0,
 
             time_on_page REAL,
-
             scroll_depth INTEGER,
 
             gps_permission TEXT,
             gps_latitude REAL,
             gps_longitude REAL,
-            gps_accuracy REAL,
-
-            extra_data TEXT
+            gps_accuracy REAL
         )
     """)
 
@@ -115,106 +107,18 @@ def init_db():
 
 
 # =========================================================
-# DATABASE MIGRATION
-# =========================================================
-
-def ensure_columns():
-
-    conn = sqlite3.connect(DB)
-
-    columns = {
-        row[1]
-        for row in conn.execute(
-            "PRAGMA table_info(visitors)"
-        ).fetchall()
-    }
-
-    required = {
-
-        "session_id": "TEXT",
-        "device_brand": "TEXT",
-        "device_model": "TEXT",
-        "country_code": "TEXT",
-        "postal_code": "TEXT",
-        "organization": "TEXT",
-        "asn": "TEXT",
-        "timezone": "TEXT",
-        "language": "TEXT",
-        "languages": "TEXT",
-
-        "screen_width": "INTEGER",
-        "screen_height": "INTEGER",
-
-        "viewport_width": "INTEGER",
-        "viewport_height": "INTEGER",
-
-        "device_pixel_ratio": "REAL",
-
-        "color_scheme": "TEXT",
-
-        "touch_support": "INTEGER",
-        "online_status": "INTEGER",
-
-        "connection_type": "TEXT",
-        "connection_effective_type": "TEXT",
-
-        "cookies_enabled": "INTEGER",
-        "java_enabled": "INTEGER",
-
-        "timezone_offset": "INTEGER",
-
-        "traffic_source": "TEXT",
-
-        "utm_source": "TEXT",
-        "utm_medium": "TEXT",
-        "utm_campaign": "TEXT",
-        "utm_term": "TEXT",
-        "utm_content": "TEXT",
-
-        "is_returning": "INTEGER DEFAULT 0",
-
-        "time_on_page": "REAL",
-        "scroll_depth": "INTEGER",
-
-        "gps_permission": "TEXT",
-
-        "gps_latitude": "REAL",
-        "gps_longitude": "REAL",
-        "gps_accuracy": "REAL",
-
-        "extra_data": "TEXT"
-    }
-
-    for column, datatype in required.items():
-
-        if column not in columns:
-
-            try:
-
-                conn.execute(
-                    f"ALTER TABLE visitors ADD COLUMN {column} {datatype}"
-                )
-
-            except sqlite3.OperationalError:
-                pass
-
-    conn.commit()
-    conn.close()
-
-
-# =========================================================
-# GET CLIENT IP
+# IP ADDRESS
 # =========================================================
 
 def get_ip():
 
-    forwarded_for = request.headers.get(
+    forwarded = request.headers.get(
         "X-Forwarded-For"
     )
 
-    if forwarded_for:
+    if forwarded:
 
-        return forwarded_for.split(",")[0].strip()
+        return forwarded.split(",")[0].strip()
 
     return request.remote_addr
 
@@ -225,7 +129,7 @@ def get_ip():
 
 def get_ip_location(ip):
 
-    empty = {
+    result = {
 
         "country": None,
         "country_code": None,
@@ -244,16 +148,15 @@ def get_ip_location(ip):
     }
 
     if not ip:
-        return empty
+        return result
 
-    # Local IP
     if (
         ip.startswith("127.")
         or ip.startswith("10.")
         or ip.startswith("192.168.")
         or ip == "::1"
     ):
-        return empty
+        return result
 
     try:
 
@@ -273,7 +176,7 @@ def get_ip_location(ip):
 
             data = response.json()
 
-            return {
+            result.update({
 
                 "country":
                     data.get("country_name"),
@@ -307,12 +210,16 @@ def get_ip_location(ip):
 
                 "timezone":
                     data.get("timezone")
-            }
+            })
 
-    except Exception:
-        pass
+    except Exception as e:
 
-    return empty
+        print(
+            "IP geolocation error:",
+            e
+        )
+
+    return result
 
 
 # =========================================================
@@ -324,85 +231,36 @@ def landing():
 
     ip = get_ip()
 
-    ua_string = request.headers.get(
+    user_agent = request.headers.get(
         "User-Agent",
         ""
     )
 
-    ua = parse(ua_string)
+    ua = parse(user_agent)
 
     location = get_ip_location(ip)
+
+
+    # -----------------------------------------------------
+    # SESSION
+    # -----------------------------------------------------
 
     session_id = request.cookies.get(
         "analytics_session"
     )
 
-    returning = 1 if session_id else 0
+    is_returning = 1 if session_id else 0
 
     if not session_id:
 
-        session_id = str(uuid.uuid4())
+        session_id = str(
+            uuid.uuid4()
+        )
 
-    visitor = {
 
-        "visit_time":
-            datetime.now(timezone.utc).isoformat(),
-
-        "session_id":
-            session_id,
-
-        "ip":
-            ip,
-
-        "user_agent":
-            ua_string,
-
-        "browser":
-            ua.browser.family,
-
-        "browser_version":
-            ua.browser.version_string,
-
-        "os":
-            ua.os.family,
-
-        "os_version":
-            ua.os.version_string,
-
-        "device":
-            ua.device.family,
-
-        "device_brand":
-            getattr(
-                ua.device,
-                "brand",
-                ""
-            ),
-
-        "device_model":
-            getattr(
-                ua.device,
-                "model",
-                ""
-            ),
-
-        "referrer":
-            request.headers.get(
-                "Referer",
-                ""
-            ),
-
-        "page_url":
-            request.url,
-
-        "landing_page":
-            request.path,
-
-        **location,
-
-        "is_returning":
-            returning
-    }
+    # -----------------------------------------------------
+    # INSERT VISITOR
+    # -----------------------------------------------------
 
     conn = sqlite3.connect(DB)
 
@@ -427,7 +285,6 @@ def landing():
             device_model,
 
             referrer,
-
             page_url,
             landing_page,
 
@@ -452,84 +309,169 @@ def landing():
 
         VALUES (
 
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?, ?, ?
+            ?, ?,
+
+            ?, ?,
+
+            ?, ?,
+
+            ?, ?,
+
+            ?, ?, ?,
+
+            ?, ?, ?,
+
+            ?, ?, ?, ?, ?,
+
+            ?, ?,
+
+            ?, ?, ?,
+
+            ?,
+
+            ?
 
         )
 
     """, (
 
-        visitor["visit_time"],
-        visitor["session_id"],
+        # 1
+        datetime.now(
+            timezone.utc
+        ).isoformat(),
 
-        visitor["ip"],
-        visitor["user_agent"],
+        # 2
+        session_id,
 
-        visitor["browser"],
-        visitor["browser_version"],
+        # 3
+        ip,
 
-        visitor["os"],
-        visitor["os_version"],
+        # 4
+        user_agent,
 
-        visitor["device"],
-        visitor["device_brand"],
-        visitor["device_model"],
+        # 5
+        ua.browser.family,
 
-        visitor["referrer"],
+        # 6
+        ua.browser.version_string,
 
-        visitor["page_url"],
-        visitor["landing_page"],
+        # 7
+        ua.os.family,
 
-        visitor["country"],
-        visitor["country_code"],
-        visitor["region"],
-        visitor["city"],
-        visitor["postal_code"],
+        # 8
+        ua.os.version_string,
 
-        visitor["latitude"],
-        visitor["longitude"],
+        # 9
+        ua.device.family,
 
-        visitor["isp"],
-        visitor["organization"],
-        visitor["asn"],
+        # 10
+        getattr(
+            ua.device,
+            "brand",
+            ""
+        ),
 
-        visitor["timezone"],
+        # 11
+        getattr(
+            ua.device,
+            "model",
+            ""
+        ),
 
-        visitor["is_returning"]
+        # 12
+        request.headers.get(
+            "Referer",
+            ""
+        ),
 
+        # 13
+        request.url,
+
+        # 14
+        request.path,
+
+        # 15
+        location["country"],
+
+        # 16
+        location["country_code"],
+
+        # 17
+        location["region"],
+
+        # 18
+        location["city"],
+
+        # 19
+        location["postal_code"],
+
+        # 20
+        location["latitude"],
+
+        # 21
+        location["longitude"],
+
+        # 22
+        location["isp"],
+
+        # 23
+        location["organization"],
+
+        # 24
+        location["asn"],
+
+        # 25
+        location["timezone"],
+
+        # 26
+        is_returning
     ))
+
 
     visitor_id = cursor.lastrowid
 
     conn.commit()
     conn.close()
 
-    response = render_template(
-        "landing.html"
+
+    # -----------------------------------------------------
+    # RENDER PAGE
+    # -----------------------------------------------------
+
+    html = render_template(
+
+        "landing.html",
+
+        visitor_id=visitor_id
     )
 
-    # Session cookie
-    response = app.make_response(response)
+
+    response = app.make_response(
+        html
+    )
+
 
     response.set_cookie(
+
         "analytics_session",
+
         session_id,
+
         max_age=60 * 60 * 24 * 365,
+
         httponly=True,
+
         samesite="Lax",
+
         secure=True
     )
 
-    response.headers[
-        "X-Visitor-ID"
-    ] = str(visitor_id)
 
     return response
 
 
 # =========================================================
-# BROWSER INFORMATION API
+# BROWSER INFORMATION
 # =========================================================
 
 @app.route(
@@ -542,25 +484,25 @@ def browser_info():
         silent=True
     ) or {}
 
-    visitor_id = request.headers.get(
-        "X-Visitor-ID"
+
+    visitor_id = data.get(
+        "visitor_id"
     )
 
-    # Better fallback
-    if not visitor_id:
-
-        visitor_id = request.args.get(
-            "visitor_id"
-        )
 
     if not visitor_id:
 
         return jsonify({
+
             "success": False,
-            "error": "Missing visitor ID"
+
+            "error":
+                "Missing visitor_id"
+
         }), 400
 
-    allowed = {
+
+    allowed_fields = [
 
         "language",
         "languages",
@@ -576,7 +518,6 @@ def browser_info():
         "color_scheme",
 
         "touch_support",
-
         "online_status",
 
         "connection_type",
@@ -600,60 +541,74 @@ def browser_info():
         "scroll_depth",
 
         "gps_permission",
-
         "gps_latitude",
         "gps_longitude",
         "gps_accuracy"
-    }
+    ]
 
-    clean = {
-        k: data.get(k)
-        for k in allowed
-        if k in data
-    }
 
-    conn = sqlite3.connect(DB)
+    updates = []
 
-    if clean:
+    values = []
 
-        fields = []
-        values = []
 
-        for key, value in clean.items():
+    for field in allowed_fields:
 
-            fields.append(
-                f"{key} = ?"
+        if field in data:
+
+            updates.append(
+                f"{field} = ?"
             )
 
-            if isinstance(value, (dict, list)):
+            value = data[field]
 
-                value = json.dumps(value)
+
+            if isinstance(
+                value,
+                list
+            ):
+
+                value = ",".join(
+                    str(x)
+                    for x in value
+                )
+
 
             values.append(value)
 
-        values.append(visitor_id)
 
-        sql = f"""
+    if updates:
 
-            UPDATE visitors
+        values.append(
+            visitor_id
+        )
 
-            SET {", ".join(fields)}
 
-            WHERE id = ?
+        conn = sqlite3.connect(DB)
 
-        """
 
         conn.execute(
-            sql,
+
+            f"""
+            UPDATE visitors
+
+            SET {", ".join(updates)}
+
+            WHERE id = ?
+            """,
+
             values
         )
 
-        conn.commit()
 
-    conn.close()
+        conn.commit()
+        conn.close()
+
 
     return jsonify({
+
         "success": True
+
     })
 
 
@@ -668,6 +623,7 @@ def dashboard():
 
     conn.row_factory = sqlite3.Row
 
+
     visitors = conn.execute("""
 
         SELECT *
@@ -678,16 +634,20 @@ def dashboard():
 
     """).fetchall()
 
+
     conn.close()
 
+
     return render_template(
+
         "dashboard.html",
+
         visitors=visitors
     )
 
 
 # =========================================================
-# API: VISITOR DETAILS
+# JSON API
 # =========================================================
 
 @app.route("/api/visitors")
@@ -696,6 +656,7 @@ def visitors_api():
     conn = sqlite3.connect(DB)
 
     conn.row_factory = sqlite3.Row
+
 
     visitors = conn.execute("""
 
@@ -709,21 +670,24 @@ def visitors_api():
 
     """).fetchall()
 
+
     conn.close()
 
+
     return jsonify([
-        dict(v)
-        for v in visitors
+
+        dict(visitor)
+
+        for visitor in visitors
+
     ])
 
 
 # =========================================================
-# DATABASE INITIALIZATION
+# INITIALIZE DATABASE
 # =========================================================
 
 init_db()
-
-ensure_columns()
 
 
 # =========================================================
